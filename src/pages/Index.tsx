@@ -65,7 +65,7 @@ const Index = () => {
   };
 
   const goToGitHub = () => {
-    window.open("https://github.com/Xaypanya/Xaypanya", "_blank");
+    window.open("https://github.com/Xaypanya", "_blank");
   };
 
   return (
