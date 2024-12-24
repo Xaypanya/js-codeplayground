@@ -8,6 +8,7 @@ import Editor from "@monaco-editor/react";
 import { Binary, Github, SquareChevronRight } from "lucide-react"
 import * as Babel from "@babel/standalone";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import VoltLabIcon from "../../jscpg.svg"
 
 const Index = () => {
   const [code, setCode] = useState("");
@@ -85,7 +86,7 @@ const Index = () => {
       </TooltipProvider>
       <div className="flex justify-center items-center gap-4 mb-8">
           <img 
-            src="/jscpg.svg" 
+            src={VoltLabIcon} 
             alt="Logo" 
             className="w-12 h-12 transition-transform hover:scale-110"
           />
