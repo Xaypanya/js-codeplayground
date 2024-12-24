@@ -5,24 +5,31 @@ import {
 } from "@/components/ui/resizable";
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { Binary, Github } from "lucide-react"
+import { Binary, Github } from "lucide-react";
 import * as Babel from "@babel/standalone";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import VoltLabIcon from "../../jscpg.svg"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import VoltLabIcon from "../../jscpg.svg";
 
 const BinaryBackground = () => {
-  const [binaryStrings, setBinaryStrings] = useState([]);
-  
+  const [binaryStrings, setBinaryStrings] = useState<string[]>([]);
+
   useEffect(() => {
     const generateBinaryString = () => {
-      return Array.from({ length: 50 }, () => Math.random() > 0.5 ? '1' : '0').join('');
+      return Array.from({ length: 50 }, () =>
+        Math.random() > 0.5 ? "1" : "0"
+      ).join("");
     };
 
     const initialStrings = Array.from({ length: 20 }, generateBinaryString);
     setBinaryStrings(initialStrings);
 
     const interval = setInterval(() => {
-      setBinaryStrings(prev => {
+      setBinaryStrings((prev) => {
         const newStrings = [...prev];
         const randomIndex = Math.floor(Math.random() * newStrings.length);
         newStrings[randomIndex] = generateBinaryString();
@@ -36,12 +43,12 @@ const BinaryBackground = () => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-5 rotate-6">
       {binaryStrings.map((str, i) => (
-        <div 
-          key={i} 
+        <div
+          key={i}
           className="font-mono text-sm whitespace-nowrap animate-fade-in"
           style={{
             transform: `translateY(${i * 24}px)`,
-            color: 'currentColor'
+            color: "currentColor",
           }}
         >
           {str}
@@ -52,19 +59,19 @@ const BinaryBackground = () => {
 };
 
 const Index = () => {
-  const [code, setCode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('editorCode') || '';
+  const [code, setCode] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("editorCode") || "";
     }
-    return '';
+    return "";
   });
-  const [output, setOutput] = useState("");
-  const [error, setError] = useState(null);
+  const [output, setOutput] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleEditorChange = (value) => {
+  const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
       setCode(value);
-      localStorage.setItem('editorCode', value);
+      localStorage.setItem("editorCode", value);
     }
   };
 
@@ -74,8 +81,10 @@ const Index = () => {
       setOutput("");
 
       let outputBuffer = "";
+      const timers: { [key: string]: number } = {};
+
       const secureConsole = {
-        log: (...args) => {
+        log: (...args: any[]) => {
           outputBuffer +=
             args
               .map((arg) =>
@@ -84,9 +93,38 @@ const Index = () => {
               .join(" ") + "\n";
           setOutput(outputBuffer);
         },
-        error: (...args) => {
+        error: (...args: any[]) => {
           outputBuffer += "Error: " + args.join(" ") + "\n";
           setOutput(outputBuffer);
+        },
+        time: (label: string = "default") => {
+          if (timers[label]) {
+            secureConsole.error(
+              `Timer '${label}' already exists. Use a different label or call console.timeEnd('${label}') before starting a new timer with the same label.`
+            );
+            return;
+          }
+          if (typeof performance !== "undefined" && performance.now) {
+            timers[label] = performance.now();
+          } else {
+            timers[label] = Date.now();
+          }
+        },
+        timeEnd: (label: string = "default") => {
+          if (timers[label]) {
+            let duration: number;
+            if (typeof performance !== "undefined" && performance.now) {
+              duration = performance.now() - timers[label];
+              duration = parseFloat(duration.toFixed(3)); // three decimal places
+            } else {
+              duration = Date.now() - timers[label];
+            }
+            outputBuffer += `${label}: ${duration}ms\n`;
+            setOutput(outputBuffer);
+            delete timers[label];
+          } else {
+            secureConsole.error(`Timer '${label}' does not exist.`);
+          }
         },
       };
 
@@ -117,8 +155,11 @@ const Index = () => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button onClick={goToGitHub} className="absolute top-8 right-4 border p-2 rounded-full">
-                <Github className="text-black"/>
+              <button
+                onClick={goToGitHub}
+                className="absolute top-8 right-4 border p-2 rounded-full"
+              >
+                <Github className="text-black" />
               </button>
             </TooltipTrigger>
             <TooltipContent>
@@ -127,12 +168,12 @@ const Index = () => {
           </Tooltip>
         </TooltipProvider>
         <div className="flex justify-center items-center gap-4 mb-8">
-          <img 
-            src={VoltLabIcon} 
-            alt="Logo" 
+          <img
+            src={VoltLabIcon}
+            alt="Logo"
             className="w-12 h-12 transition-transform hover:scale-110"
           />
-          <h1 
+          <h1
             className="text-4xl font-bold tracking-tighter"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
@@ -151,7 +192,7 @@ const Index = () => {
                   onClick={compileAndExecute}
                   className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200 shadow-sm"
                 >
-                  <Binary size={18}/>
+                  <Binary size={18} />
                   Run Code
                 </button>
               </div>
@@ -186,15 +227,24 @@ const Index = () => {
               <div className="flex items-center mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <h2 className="text-lg font-semibold flex items-center justify-center gap-1">Console Output</h2>
+                  <h2 className="text-lg font-semibold flex items-center justify-center gap-1">
+                    Console Output
+                  </h2>
                 </div>
-                <button className="ml-auto text-sm text-muted-foreground hover:text-foreground" onClick={clearOutput}>Clear</button>
+                <button
+                  className="ml-auto text-sm text-muted-foreground hover:text-foreground"
+                  onClick={clearOutput}
+                >
+                  Clear
+                </button>
               </div>
               <div className="flex-1 font-mono bg-black p-6 rounded overflow-auto border shadow-inner">
                 {error ? (
                   <div className="text-destructive">{error}</div>
                 ) : (
-                  <pre className="whitespace-pre-wrap text-green-500">{output}</pre>
+                  <pre className="whitespace-pre-wrap text-green-500">
+                    {output}
+                  </pre>
                 )}
               </div>
             </div>
