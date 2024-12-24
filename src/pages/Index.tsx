@@ -3,34 +3,79 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { Binary, Github, SquareChevronRight } from "lucide-react"
+import { Binary, Github } from "lucide-react"
 import * as Babel from "@babel/standalone";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import VoltLabIcon from "../../jscpg.svg"
 
-const Index = () => {
-  const [code, setCode] = useState("");
-  const [output, setOutput] = useState("");
-  const [error, setError] = useState<string | null>(null);
+const BinaryBackground = () => {
+  const [binaryStrings, setBinaryStrings] = useState([]);
+  
+  useEffect(() => {
+    const generateBinaryString = () => {
+      return Array.from({ length: 50 }, () => Math.random() > 0.5 ? '1' : '0').join('');
+    };
 
-  const handleEditorChange = (value: string | undefined) => {
+    const initialStrings = Array.from({ length: 20 }, generateBinaryString);
+    setBinaryStrings(initialStrings);
+
+    const interval = setInterval(() => {
+      setBinaryStrings(prev => {
+        const newStrings = [...prev];
+        const randomIndex = Math.floor(Math.random() * newStrings.length);
+        newStrings[randomIndex] = generateBinaryString();
+        return newStrings;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-5 rotate-6">
+      {binaryStrings.map((str, i) => (
+        <div 
+          key={i} 
+          className="font-mono text-sm whitespace-nowrap animate-fade-in"
+          style={{
+            transform: `translateY(${i * 24}px)`,
+            color: 'currentColor'
+          }}
+        >
+          {str}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const Index = () => {
+  const [code, setCode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('editorCode') || '';
+    }
+    return '';
+  });
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState(null);
+
+  const handleEditorChange = (value) => {
     if (value !== undefined) {
       setCode(value);
+      localStorage.setItem('editorCode', value);
     }
   };
 
   const compileAndExecute = () => {
     try {
-      // Clear previous output and errors
       setError(null);
       setOutput("");
 
-      // Create a secure context for console.log
       let outputBuffer = "";
       const secureConsole = {
-        log: (...args: any[]) => {
+        log: (...args) => {
           outputBuffer +=
             args
               .map((arg) =>
@@ -39,21 +84,17 @@ const Index = () => {
               .join(" ") + "\n";
           setOutput(outputBuffer);
         },
-        error: (...args: any[]) => {
+        error: (...args) => {
           outputBuffer += "Error: " + args.join(" ") + "\n";
           setOutput(outputBuffer);
         },
       };
 
-      // Transform code to handle console.log
       const transformedCode = Babel.transform(code, {
         presets: ["env"],
       }).code;
 
-      // Create a secure Function with limited scope
-      const secureFunction = new Function("console", transformedCode!);
-
-      // Execute the code with our secure console
+      const secureFunction = new Function("console", transformedCode);
       secureFunction(secureConsole);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -70,21 +111,22 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted relative">
+      <BinaryBackground />
       <div className="container mx-auto py-6 px-4 relative">
         <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button onClick={goToGitHub} className="absolute top-8 right-4 border p-2 rounded-full">
-              <Github className="text-black"/>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Xaypanya Phongsa</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-      <div className="flex justify-center items-center gap-4 mb-8">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={goToGitHub} className="absolute top-8 right-4 border p-2 rounded-full">
+                <Github className="text-black"/>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Xaypanya Phongsa</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <div className="flex justify-center items-center gap-4 mb-8">
           <img 
             src={VoltLabIcon} 
             alt="Logo" 
@@ -101,7 +143,6 @@ const Index = () => {
           direction="horizontal"
           className="min-h-[80vh] rounded-xl border shadow-lg bg-background/95 backdrop-blur-sm"
         >
-          {/* Code Editor Panel */}
           <ResizablePanel defaultSize={50}>
             <div className="h-full flex flex-col">
               <div className="flex justify-between items-center p-4 border-b bg-muted/30">
@@ -140,13 +181,12 @@ const Index = () => {
 
           <ResizableHandle withHandle />
 
-          {/* Preview Panel */}
           <ResizablePanel defaultSize={50}>
             <div className="h-full flex flex-col p-6">
               <div className="flex items-center mb-4">
                 <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <h2 className="text-lg font-semibold flex items-center justify-center gap-1">Console Output</h2>
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <h2 className="text-lg font-semibold flex items-center justify-center gap-1">Console Output</h2>
                 </div>
                 <button className="ml-auto text-sm text-muted-foreground hover:text-foreground" onClick={clearOutput}>Clear</button>
               </div>
