@@ -234,7 +234,7 @@ const Index = () => {
                           )}
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="bottom" >
                         <p>{isFullScreen ? 'Exit Fullscreen' : 'Fullscreen'}</p>
                       </TooltipContent>
                     </Tooltip>
