@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/resizable";
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { Binary, Github } from "lucide-react";
+import { Binary, Github, Expand, Minimize, Play } from "lucide-react";
 import * as Babel from "@babel/standalone";
 import {
   Tooltip,
@@ -41,7 +41,7 @@ const BinaryBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-5 rotate-6">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-10 rotate-6">
       {binaryStrings.map((str, i) => (
         <div
           key={i}
@@ -67,6 +67,7 @@ const Index = () => {
   });
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -115,7 +116,7 @@ const Index = () => {
             let duration: number;
             if (typeof performance !== "undefined" && performance.now) {
               duration = performance.now() - timers[label];
-              duration = parseFloat(duration.toFixed(3)); // three decimal places
+              duration = parseFloat(duration.toFixed(3));
             } else {
               duration = Date.now() - timers[label];
             }
@@ -148,16 +149,38 @@ const Index = () => {
     window.open("https://github.com/Xaypanya/js-codeplayground", "_blank");
   };
 
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+  };
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsFullScreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted relative">
+    <div className={`min-h-screen bg-gradient-to-b from-background to-muted relative ${
+      isFullScreen ? 'fixed inset-0 z-50 bg-background' : ''
+    }`}>
       <BinaryBackground />
-      <div className="container mx-auto py-6 px-4 relative">
+      <div className={`container mx-auto py-6 px-4 relative ${
+        isFullScreen ? 'h-full p-0' : ''
+      }`}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={goToGitHub}
-                className="absolute top-8 right-4 border p-2 rounded-full"
+                className={`absolute top-8 right-4 border p-2 rounded-full ${
+                  isFullScreen ? 'hidden' : ''
+                }`}
               >
                 <Github className="text-black" />
               </button>
@@ -167,7 +190,10 @@ const Index = () => {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <div className="flex justify-center items-center gap-4 mb-8">
+        
+        <div className={`flex justify-center items-center gap-4 mb-8 ${
+          isFullScreen ? 'hidden' : ''
+        }`}>
           <img
             src={VoltLabIcon}
             alt="Logo"
@@ -180,21 +206,47 @@ const Index = () => {
             Volt Lab
           </h1>
         </div>
+
         <ResizablePanelGroup
           direction="horizontal"
-          className="min-h-[80vh] rounded-xl border shadow-lg bg-background/95 backdrop-blur-sm"
+          className={`${
+            isFullScreen 
+              ? 'fixed inset-0 rounded-none border-none'
+              : 'min-h-[80vh] rounded-xl border shadow-lg'
+          } bg-background/95 backdrop-blur-sm`}
         >
           <ResizablePanel defaultSize={50}>
             <div className="h-full flex flex-col">
               <div className="flex justify-between items-center p-4 border-b bg-muted/30">
                 <span className="text-sm font-medium">JavaScript Editor</span>
-                <button
-                  onClick={compileAndExecute}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200 shadow-sm"
-                >
-                  <Binary size={18} />
-                  Run Code
-                </button>
+                <div className="flex gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={toggleFullScreen}
+                          className="p-2 hover:bg-muted rounded-md transition-colors"
+                        >
+                          {isFullScreen ? (
+                            <Minimize className="h-5 w-5" />
+                          ) : (
+                            <Expand className="h-5 w-5" />
+                          )}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isFullScreen ? 'Exit Fullscreen' : 'Fullscreen'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <button
+                    onClick={compileAndExecute}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200 shadow-sm"
+                  >
+                    <Play size={18} />
+                    Run 
+                  </button>
+                </div>
               </div>
               <div className="flex-1 p-4">
                 <Editor
