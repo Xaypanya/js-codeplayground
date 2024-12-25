@@ -145,7 +145,7 @@ const Index = () => {
   };
 
   const goToGitHub = () => {
-    window.open("https://github.com/Xaypanya", "_blank");
+    window.open("https://github.com/Xaypanya/js-codeplayground", "_blank");
   };
 
   return (
@@ -163,7 +163,7 @@ const Index = () => {
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Xaypanya Phongsa</p>
+              <p>Repository</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
