@@ -6,14 +6,14 @@ A minimalist JavaScript playground that lets you write and test code instantly i
 
 ![volt-lab-screenshot](https://raw.githubusercontent.com/Xaypanya/js-codeplayground/refs/heads/main/volt-lab-screenshot.png "volt-lab-screenshot")
 
-### ✨ Features
+###  Features
 -  Instant JavaScript execution
 -  Code snippets included
 -  Clean, distraction-free interface
 -  Real-time error feedback
 
 
-### 🛠️ Built With
+### Built With
 
 - Vite - Next Generation Frontend Tooling
 - React - A JavaScript library for building user interfaces
@@ -21,7 +21,7 @@ A minimalist JavaScript playground that lets you write and test code instantly i
 - shadcn/ui - Beautifully designed components
 - Tailwind CSS - A utility-first CSS framework
 
-### 🚀 Quick Start
+### Quick Start
 ##### Clone the repository
 ```bash
 git clone https://github.com/Xaypanya/js-codeplayground
@@ -32,12 +32,12 @@ git clone https://github.com/Xaypanya/js-codeplayground
 npm install
 ```
 
-#####   Start development server
+##### Start development server
 ```bash
 npm run dev
 ```
 
-### 🤝 Contributing
+### Contributing
 Feel free to contribute! Open an issue or submit PRs.
 
 1. Fork the Project
@@ -46,12 +46,15 @@ Feel free to contribute! Open an issue or submit PRs.
 4. Push to the Branch (git push origin feature/AmazingFeature)
 5. Open a Pull Request
 
-### 📝 License
+### License
 Distributed under the MIT License. See LICENSE for more information.
 
-### 📧 Contact
+### Contact
 Xaypanya Phongsa - @Xaypanya
 Project Link: https://github.com/Xaypanya/js-codeplayground
 
 Made with ❤️ by Xaypanya Phongsa
-#javascript #webdev #react #typescript #coding
+
+### Live Production
+🚀 https://volt-lab.vercel.app/
+
